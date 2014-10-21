@@ -1,0 +1,4 @@
+name: BungeeLANBroadcaster
+main: com.ruinscraft.dukesmart.BungeeLANBroadcaster
+version: 1.0.0
+author: dukesmart
