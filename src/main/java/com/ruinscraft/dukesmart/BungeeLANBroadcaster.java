@@ -24,6 +24,7 @@ public class BungeeLANBroadcaster extends Plugin {
     	    private DatagramSocket socket;
 			private int failcount;
 			private InetSocketAddress host;
+			private String motd;
 
 			@Override
     	    public void run() {
@@ -42,7 +43,8 @@ public class BungeeLANBroadcaster extends Plugin {
     	    }
 
 			private byte[] getAd() {
-				String motd = ProxyServer.getInstance().getServerInfo("lobby").getMotd();
+				/*String motd = ProxyServer.getInstance().getServerInfo("lobby").getMotd();*/
+				String motd = getBungeeMotd();
 			    InetSocketAddress host = getHost();
 			    /*String ip = host.getHostString();*/
 			    int port = host.getPort();
@@ -57,6 +59,15 @@ public class BungeeLANBroadcaster extends Plugin {
 			      ex.printStackTrace();
 			    }
 			    return str.getBytes();
+			}
+
+			private String getBungeeMotd() {
+				ConfigurationAdapter adapter = ProxyServer.getInstance().getConfigurationAdapter();
+				for ( final ListenerInfo info : adapter.getListeners() )
+		        {
+					motd = info.getMotd();
+		        }
+				return motd;
 			}
 
 			private InetSocketAddress getHost() {
