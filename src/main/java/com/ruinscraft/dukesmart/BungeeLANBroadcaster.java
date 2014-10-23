@@ -5,6 +5,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.util.concurrent.TimeUnit;
 
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.config.ConfigurationAdapter;
@@ -14,13 +15,12 @@ import net.md_5.bungee.api.plugin.Plugin;
 public class BungeeLANBroadcaster extends Plugin {
 	private static final String BROADCAST_HOST = "224.0.2.60";
 	private static final int BROADCAST_PORT = 4445;
-	public Thread thread;
 	
 
     @Override
     public void onEnable() {
        
-       getProxy().getScheduler().runAsync(this, new Runnable() {
+       getProxy().getScheduler().schedule(this, new Runnable() {
     	    private DatagramSocket socket;
 			private int failcount;
 			private InetSocketAddress host;
@@ -43,13 +43,10 @@ public class BungeeLANBroadcaster extends Plugin {
     	    }
 
 			private byte[] getAd() {
-				/*String motd = ProxyServer.getInstance().getServerInfo("lobby").getMotd();*/
 				String motd = getBungeeMotd();
 			    InetSocketAddress host = getHost();
-			    /*String ip = host.getHostString();*/
 			    int port = host.getPort();
 			    String str = "[MOTD]" + motd + "[/MOTD][AD]" + port + "[/AD]";
-			    getProxy().getLogger().info("Broadcasting: " + str);
 			    try
 			    {
 			      return str.getBytes("UTF-8");
@@ -83,17 +80,14 @@ public class BungeeLANBroadcaster extends Plugin {
 			private void broadcast(DatagramSocket socket, DatagramPacket packet) {
 				try
 				{
-					for (;;)
+					try
 					{
-						try
-						{
-							socket.send(packet);
-							this.failcount = 0;
-						}
-						catch (Throwable ex)
-						{
-							fail(ex);
-						}
+						socket.send(packet);
+						this.failcount = 0;
+					}
+					catch (Throwable ex)
+					{
+						fail(ex);
 					}
 				}
 				catch (InterruptedException localInterruptedException)
@@ -116,7 +110,7 @@ public class BungeeLANBroadcaster extends Plugin {
 				    }
 				    Thread.sleep(8500L);
 			}
-    	  });
+    	  }, 50, 50, TimeUnit.MILLISECONDS);
     }
     
     public void onDisable() {
